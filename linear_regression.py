@@ -136,3 +136,41 @@ plt.title('Training and Test Loss Curve')
 plt.legend()
 plt.grid(True)
 plt.show()
+
+#%%
+import torch.optim as optim
+
+model_new_optimizer = ClassificationNet(input_units=30, hidden_units=64, output_units=2)
+
+criterion = nn.CrossEntropyLoss()
+optimizer = optim.SGD(model_new_optimizer.parameters(), lr=0.001, momentum=0.9, weight_decay=0.0001)
+epochs = 10
+train_losses = []
+test_losses = []
+
+for epoch in range(epochs):
+    model_new_optimizer.train()
+    running_loss = 0.0
+    for X_batch, y_btch in train_loader:
+        optimizer.zero_grad()
+        outputs = model_new_optimizer(X_batch)
+        loss = criterion(outputs, y_batch)
+        loss.backward()
+        optimizer.step()
+        running_loss += loss.item()
+    
+    train_loss  += running_loss / len(train_loader)
+    train_losses.append(train_loss)
+    
+    model_new_optimizer.eval()
+    test_loss = 0.0
+    with torch.no_grad():
+        for X_batch, y_batch in test_loader:
+            test_outputs = model_new_optimizer(X_batch)
+            loss = criterion(test_outputs, y_batch)
+            test_loss += loss.item()
+            
+    test_loss /= len(test_loader)
+    test_losses.append(test_loss)
+    
+    print(f"Epoch [{epoch+1}/{epochs}], Train Loss: {train_loss:.4f}, Test Loss: {test_loss:.4f}")
